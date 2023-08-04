@@ -1,9 +1,10 @@
+import java.util.Locale
+
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.agp.app)
 }
 
 android {
-
     defaultConfig {
         multiDexEnabled = false
     }
@@ -14,11 +15,12 @@ android {
             proguardFiles("proguard-rules.pro")
         }
     }
+    namespace = "org.lsposed.lspatch.metaloader"
 }
 
 androidComponents.onVariants { variant ->
-    val variantCapped = variant.name.capitalize()
-    val variantLowered = variant.name.toLowerCase()
+    val variantCapped = variant.name.replaceFirstChar { it.uppercase() }
+    val variantLowered = variant.name.lowercase()
 
     task<Copy>("copyDex$variantCapped") {
         dependsOn("assemble$variantCapped")
@@ -27,7 +29,7 @@ androidComponents.onVariants { variant ->
             "$buildDir/intermediates/dex/$variantLowered/mergeDex$variantCapped"
         from(dexOutPath)
         rename("classes.dex", "metaloader.dex")
-        into("${rootProject.projectDir}/out/assets/lspatch")
+        into("${rootProject.projectDir}/out/assets/${variant.name}/lspatch")
     }
 
     task("copy$variantCapped") {
@@ -42,5 +44,5 @@ androidComponents.onVariants { variant ->
 dependencies {
     compileOnly(projects.hiddenapi.stubs)
     implementation(projects.share.java)
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
+    implementation(libs.hiddenapibypass)
 }

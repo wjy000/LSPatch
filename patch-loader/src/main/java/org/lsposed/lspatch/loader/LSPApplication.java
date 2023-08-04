@@ -85,8 +85,7 @@ public class LSPApplication {
         }
 
         disableProfile(context);
-        Startup.initXposed(false, ActivityThread.currentProcessName(), service);
-        Log.i(TAG, "Bootstrap Xposed");
+        Startup.initXposed(false, ActivityThread.currentProcessName(), context.getApplicationInfo().dataDir, service);
         Startup.bootstrapXposed();
         // WARN: Since it uses `XResource`, the following class should not be initialized
         // before forkPostCommon is invoke. Otherwise, you will get failure of XResources
@@ -137,6 +136,7 @@ public class LSPApplication {
                     Files.copy(is, cacheApkPath);
                 }
             }
+            cacheApkPath.toFile().setWritable(false);
 
             var mPackages = (Map<?, ?>) XposedHelpers.getObjectField(activityThread, "mPackages");
             mPackages.remove(appInfo.packageName);
